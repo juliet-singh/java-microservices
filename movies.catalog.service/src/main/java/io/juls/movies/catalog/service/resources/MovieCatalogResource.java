@@ -34,17 +34,23 @@ public class MovieCatalogResource {
         //WebClient.Builder builder=WebClient.builder(); --- used @bean instead
 
         //get all rated movie ids
-       /* List<Rating> ratings = Arrays.asList(
-             new Rating("123",4),
-             new Rating("456",3)
-        );*/
-
-        UserRating ratings=restTemplate.getForObject("http://localhost:8083/ratingsdata/users/"+userId, UserRating.class);
+        UserRating ratings=restTemplate.getForObject("http://ratings-data-service/ratingsdata/users/"+userId, UserRating.class);
         System.out.println(ratings);
 
         // for each movie id , get the movie detail - call movie info
        return ratings.getUserRating().stream().map(rating -> {
-           Movie movie= restTemplate.getForObject("http://localhost:8082/movies/"+rating.getMovieId(), Movie.class);
+           Movie movie= restTemplate.getForObject("http://movie-info-service/movies/"+rating.getMovieId(), Movie.class);
+           //put it all together
+
+               return new CatalogItem(movie.getName(), "test", rating.getRating());
+       })
+       .collect(Collectors.toList());
+
+      //  return Collections.singletonList(
+         //       new CatalogItem("Transformers", "test", 4)
+
+    }
+}
            /*Movie movie=webClientBuilder.build()
                    .get()
                    .uri("http://localhost:8082/movies/\"+rating.getMovieId()")
@@ -52,14 +58,3 @@ public class MovieCatalogResource {
                    .bodyToMono(Movie.class)
                    .block();
             */
-
-               return new CatalogItem(movie.getName(), "test", rating.getRating());
-       })
-       .collect(Collectors.toList());
-
-        //put it all together
-      //  return Collections.singletonList(
-         //       new CatalogItem("Transformers", "test", 4)
-
-    }
-}
